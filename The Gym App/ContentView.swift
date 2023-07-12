@@ -165,8 +165,8 @@ struct CreateWorkoutView: View {
             return
         }
         
-        // Create a file URL for the workout text file
-        let fileURL = documentsDirectory.appendingPathComponent("workout.txt")
+        // Create a file URL with the workout name as the filename
+        let fileURL = documentsDirectory.appendingPathComponent("\(workoutName).txt")
         
         do {
             // Write the workout text to the file
@@ -178,16 +178,20 @@ struct CreateWorkoutView: View {
             print("Failed to save workout: \(error.localizedDescription)")
         }
     }
+
 }
+
+
 
 struct Exercise: Identifiable {
     let id = UUID()
-    let name: String
-    let repCount: String
-    let setCount: String
-    let weight: Double
-    let unit: String
+    var name: String
+    var repCount: String
+    var setCount: String
+    var weight: Double
+    var unit: String
 }
+
 
 struct Workout {
     let name: String
