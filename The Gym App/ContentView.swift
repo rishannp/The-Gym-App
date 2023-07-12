@@ -1,17 +1,12 @@
-//
-//  ContentView.swift
-//  The Gym App
-//
-//  Created by Rishan Patel on 11/07/2023.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @State private var savedWorkouts = [Workout]()  // Array to store saved workouts
+    
     var body: some View {
         TabView {
             NavigationView {
-                MyWorkoutsView()
+                MyWorkoutsView(savedWorkouts: $savedWorkouts)  // Pass the saved workouts array
                     .navigationTitle("My Workouts")
             }
             .tabItem {
@@ -19,7 +14,7 @@ struct ContentView: View {
             }
             
             NavigationView {
-                AnalyticsView()
+                AnalyticsView(savedWorkouts: savedWorkouts)  // Pass the saved workouts array
                     .navigationTitle("Analytics")
             }
             .tabItem {
@@ -30,13 +25,15 @@ struct ContentView: View {
 }
 
 struct MyWorkoutsView: View {
+    @Binding var savedWorkouts: [Workout]  // Binding to the saved workouts
+    
     var body: some View {
         VStack {
             Text("My Workouts")
                 .font(.largeTitle)
                 .padding()
             
-            NavigationLink(destination: CreateWorkoutView()) {
+            NavigationLink(destination: CreateWorkoutView(savedWorkouts: $savedWorkouts)) {
                 Text("Create New Workout")
                     .font(.headline)
                     .padding()
@@ -44,7 +41,54 @@ struct MyWorkoutsView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
+            
+            ForEach(savedWorkouts.indices, id: \.self) { index in
+                VStack {
+                    Text(savedWorkouts[index].name)
+                        .font(.title)
+                        .padding()
+                        .background(Color.gray.opacity(0.5))
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                    
+                    ForEach(savedWorkouts[index].exercises.indices, id: \.self) { exerciseIndex in
+                        VStack {
+                            HStack {
+                                Text(savedWorkouts[index].exercises[exerciseIndex].name)
+                                    .font(.headline)
+                                Spacer()
+                                Button(action: {
+                                    addNewWeight(savedWorkoutIndex: index, exerciseIndex: exerciseIndex)
+                                }) {
+                                    Text("Add Weight")
+                                        .padding(.horizontal)
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
+                            }
+                            HStack {
+                                Text("Rep Count: \(savedWorkouts[index].exercises[exerciseIndex].repCount)")
+                                Spacer()
+                                Text("Set Count: \(savedWorkouts[index].exercises[exerciseIndex].setCount)")
+                                Spacer()
+                                Text("Weight: \(savedWorkouts[index].exercises[exerciseIndex].weight, specifier: "%.1f") \(savedWorkouts[index].exercises[exerciseIndex].unit)")
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.vertical)
+            }
         }
+    }
+    
+    private func addNewWeight(savedWorkoutIndex: Int, exerciseIndex: Int) {
+        let newWeight = Double.random(in: 50...100)  // Generate a random weight for demonstration
+        
+        savedWorkouts[savedWorkoutIndex].exercises[exerciseIndex].weight = newWeight
     }
 }
 
@@ -56,7 +100,8 @@ struct CreateWorkoutView: View {
     @State private var weight = 0.0
     @State private var isKgSelected = true
     @State private var exercises = [Exercise]()
-
+    @Binding var savedWorkouts: [Workout]  // Binding to the saved workouts
+    
     var body: some View {
         Form {
             Section(header: Text("Workout Name")) {
@@ -150,6 +195,8 @@ struct CreateWorkoutView: View {
         
         let workout = Workout(name: workoutName, exercises: exercises)
         
+        savedWorkouts.append(workout)  // Append the new workout to the saved workouts array
+        
         // Convert workout information to a string
         var workoutText = "Workout Name: \(workout.name)\n\n"
         workoutText += "Exercises:\n"
@@ -178,10 +225,84 @@ struct CreateWorkoutView: View {
             print("Failed to save workout: \(error.localizedDescription)")
         }
     }
-
 }
 
-
+struct EditExerciseView: View {
+    @Binding var savedWorkouts: [Workout]  // Binding to the saved workouts
+    let workoutIndex: Int
+    let exerciseIndex: Int
+    
+    var body: some View {
+        Form {
+            Section(header: Text("Exercise Name")) {
+                TextField("Exercise Name", text: $savedWorkouts[workoutIndex].exercises[exerciseIndex].name)
+            }
+            
+            Section(header: Text("Exercise Details")) {
+                VStack(alignment: .leading) {
+                    Text("Rep Count:")
+                    TextField("Rep Count", text: $savedWorkouts[workoutIndex].exercises[exerciseIndex].repCount)
+                        .keyboardType(.numberPad)
+                }
+                
+                VStack(alignment: .leading) {
+                    Text("Set Count:")
+                    TextField("Set Count", text: $savedWorkouts[workoutIndex].exercises[exerciseIndex].setCount)
+                        .keyboardType(.numberPad)
+                }
+                
+                VStack(alignment: .leading) {
+                    Text("Weight:")
+                    HStack {
+                        TextField("Weight", value: $savedWorkouts[workoutIndex].exercises[exerciseIndex].weight, formatter: NumberFormatter())
+                            .keyboardType(.decimalPad)
+                            .frame(width: 70)
+                            .multilineTextAlignment(.trailing)
+                        
+                        Text(savedWorkouts[workoutIndex].exercises[exerciseIndex].unit)
+                    }
+                }
+            }
+            
+            Section {
+                Button(action: saveExercise) {
+                    Text("Save Exercise")
+                }
+            }
+        }
+        .navigationTitle("Edit Exercise")
+    }
+    
+    private func saveExercise() {
+        // Get the documents directory path
+        guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return
+        }
+        
+        // Create a file URL with the workout name as the filename
+        let workoutFileURL = documentsDirectory.appendingPathComponent("\(savedWorkouts[workoutIndex].name).txt")
+        
+        do {
+            // Convert workout information to a string
+            var workoutText = "Workout Name: \(savedWorkouts[workoutIndex].name)\n\n"
+            workoutText += "Exercises:\n"
+            for exercise in savedWorkouts[workoutIndex].exercises {
+                workoutText += "- Exercise Name: \(exercise.name)\n"
+                workoutText += "  Rep Count: \(exercise.repCount)\n"
+                workoutText += "  Set Count: \(exercise.setCount)\n"
+                workoutText += "  Weight: \(exercise.weight) \(exercise.unit)\n\n"
+            }
+            
+            // Write the updated workout text to the file
+            try workoutText.write(to: workoutFileURL, atomically: true, encoding: .utf8)
+            
+            print("Exercise Updated")
+            print("File URL: \(workoutFileURL.absoluteString)")
+        } catch {
+            print("Failed to update exercise: \(error.localizedDescription)")
+        }
+    }
+}
 
 struct Exercise: Identifiable {
     let id = UUID()
@@ -192,30 +313,47 @@ struct Exercise: Identifiable {
     var unit: String
 }
 
-
 struct Workout {
-    let name: String
-    let exercises: [Exercise]
+    var name: String
+    var exercises: [Exercise]
+}
+
+struct LineChartView: View {
+    let dataPoints: [Double]
+    
+    var body: some View {
+        // Implement your line chart view here
+        Text("Line Chart")
+    }
 }
 
 struct AnalyticsView: View {
-    @State private var searchText = ""
+    let savedWorkouts: [Workout]  // Array of saved workouts
+    @State private var selectedWorkoutIndex = 0
     @State private var showGraph = false
     
     var body: some View {
         VStack {
+            Picker("Select Workout", selection: $selectedWorkoutIndex) {
+                ForEach(savedWorkouts.indices, id: \.self) { index in
+                    Text(savedWorkouts[index].name).tag(index)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
             
-            TextField("Search", text: $searchText)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            Toggle("Show Graph", isOn: $showGraph)
-                .padding()
+            Button(action: {
+                showGraph.toggle()
+            }) {
+                Text(showGraph ? "Hide Graph" : "Show Graph")
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
             
             if showGraph {
-                Text("Graph")
-                    .font(.title)
-                    .fontWeight(.bold)
+                LineChartView(dataPoints: savedWorkouts[selectedWorkoutIndex].exercises.map { $0.weight })
                     .padding()
             } else {
                 Text("Search Results")
