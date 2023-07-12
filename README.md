@@ -3,8 +3,7 @@
 
  Progress so far: 
  
-
-<img width="234" alt="MainScreen" src="https://github.com/rishannp/The-Gym-App/assets/76795183/2c2635b9-bbc1-4ee3-b488-943e54440c26">
-<img width="234" alt="InputScreen" src="https://github.com/rishannp/The-Gym-App/assets/76795183/f4b0e659-52ca-4f22-a03e-85edb63065b0">
-<img width="234" alt="MainScreenAfterSave" src="https://github.com/rishannp/The-Gym-App/assets/76795183/ee7ee43d-7b31-4589-b65d-2eac89781e05">
-<img width="234" alt="AnalyticScreen" src="https://github.com/rishannp/The-Gym-App/assets/76795183/76fa68fa-bf82-44f0-a168-ce3f43078003">
+<img width="234" alt="MainScreen" src="https://github.com/rishannp/The-Gym-App/assets/76795183/a3e60339-c886-4354-9d0a-7268040e4725">
+<img width="234" alt="InputScreen" src="https://github.com/rishannp/The-Gym-App/assets/76795183/98acc2b1-89ad-4d4a-aeca-d57ba16cc212">
+<img width="234" alt="MainScreenAfterSave" src="https://github.com/rishannp/The-Gym-App/assets/76795183/31fb26d0-802e-47fa-b898-3a24f711f01f">
+<img width="234" alt="AnalyticScreen" src="https://github.com/rishannp/The-Gym-App/assets/76795183/ff4980da-acb7-4c94-8c67-92802712e751">
