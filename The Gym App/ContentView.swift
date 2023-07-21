@@ -45,11 +45,11 @@ struct MyWorkoutsView: View {
             ForEach(savedWorkouts.indices, id: \.self) { index in
                 VStack {
                     Text(savedWorkouts[index].name)
-                        .font(.title)
+                        .font(.headline)
                         .padding()
                         .background(Color.gray.opacity(0.5))
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .cornerRadius(30)
                         .padding(.horizontal)
                     
                     ForEach(savedWorkouts[index].exercises.indices, id: \.self) { exerciseIndex in
